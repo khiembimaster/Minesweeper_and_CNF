@@ -48,20 +48,25 @@ print(unassigned)
 print(clauses)
 for a in unassigned:
     clauses.append([-int(a)])
-    cnf = CNF(from_clauses=clauses)
     satisfy = True
+    ## PYSAT
+    cnf = CNF(from_clauses=clauses)
     with Solver(bootstrap_with=cnf) as solver:
         satisfy = solver.solve()
+        print(solver.get_model())
+    ### A*
+
+    ### BACK-TRACK
+
+    ### BRUTE-FORCE
+
     if not satisfy:
         print(a)
         board[int(a[0])-1][int(a[1])-1] = 'X'
         clauses.pop(-1)
         clauses.append([int(a)])
-        
 
 np.savetxt('output.csv', board, delimiter=',',fmt='%s')
-
-# print(solver.solve(assumptions=[11]))
 
 # nC1 -> A|B|C|D|E
 # nCn -> A&B&C&D&E
