@@ -2,7 +2,7 @@ import numpy as np
 from itertools import combinations
 from pysat.formula import CNF
 from pysat.solvers import Solver
-
+import Bruteforce
 assigned = {}
 unassigned = set()
 clauses = []
@@ -50,22 +50,22 @@ for a in unassigned:
     clauses.append([-int(a)])
     satisfy = True
     ## PYSAT
-    cnf = CNF(from_clauses=clauses)
-    with Solver(bootstrap_with=cnf) as solver:
-        satisfy = solver.solve()
-        print(solver.get_model())
+    # cnf = CNF(from_clauses=clauses)
+    # with Solver(bootstrap_with=cnf) as solver:
+    #     satisfy = solver.solve()
     ### A*
 
     ### BACK-TRACK
 
     ### BRUTE-FORCE
+    satisfy = not (Bruteforce.resolution(clauses))
 
+    clauses.pop(-1)
     if not satisfy:
         print(a)
         board[int(a[0])-1][int(a[1])-1] = 'X'
-        clauses.pop(-1)
-        clauses.append([int(a)])
 
+        clauses.append([int(a)])
 np.savetxt('output.csv', board, delimiter=',',fmt='%s')
 
 # nC1 -> A|B|C|D|E

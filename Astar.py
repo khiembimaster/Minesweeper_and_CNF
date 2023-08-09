@@ -1,44 +1,47 @@
 from dataclasses import dataclass, field
+from itertools import combinations
 import heapq
 import sys
 import bisect
 
 class Problem():
     def __init__(self, INIT):
-        self._INITIAL_STATE = tuple(i for i in range(INIT))
+        self._INITIAL_STATE = INIT
 
     def GOAL_TEST(self, STATE):
-        n = len(STATE)
-        for i in range(n-1):
-            for j in range(i+1, n):
-                if (STATE[i] == STATE [j]) or (abs(STATE[i]-STATE[j]) == abs(i-j)):
-                    return False
+        if STATE in self._INITIAL_STATE:
+            return False
         return True
 
     def ACTIONS(self, STATE:list):
-        n = len(STATE)
-        childSets = []
-        for i in range(n):
-            for j in range(1, n):
-                temp = STATE.copy()
-                temp[i] = (STATE[i] + j) % n
-                childSets.append(tuple(temp))
-        return childSets
+        return [[Ci, Cj] for Ci, Cj in combinations(STATE,2)]
 
 @dataclass(frozen=True, order=True)
 class AStarNode():
-    state:tuple=field(compare=False, hash=True)
-    cost:float=field(compare=False)
-    estimated_total_cost:float
+    state:list=field(compare=False, hash=True)
+    cost:int=field(compare=False)
+    estimated_total_cost:int
 
-def heuristic(state:tuple):
-    estimated_forward_cost = 0
-    n = len(state)
-    for i in range(n-1):
-        for j in range(i+1, n):
-            if (state[i] == state[j]) or (abs(state[i]-state[j]) == abs(i-j)):
-                estimated_forward_cost += 1
-    return estimated_forward_cost
+def heuristic(state):
+    return len(state)
+
+def resolve(Ci:list,Cj:list):
+
+    count = 0
+    resolvents = None
+    for i in range(len(Ci)):
+        for j in range(len(Cj)):
+            if Ci[i]+Cj[j] == 0:
+                if count == 1:
+                    return None
+                _Ci = Ci.copy()
+                _Cj = Cj.copy()
+                _Ci.pop(i)
+                _Cj.pop(j)     
+                count+=1           
+                resolvents = tuple(set(_Ci+_Cj)) 
+    
+    return resolvents
 
 def AStar(problem:Problem):
     node = AStarNode(problem._INITIAL_STATE, 0, heuristic(problem._INITIAL_STATE))
@@ -51,8 +54,8 @@ def AStar(problem:Problem):
         if problem.GOAL_TEST(node.state):
             return (node)
         explored.add(node)
-        actions = problem.ACTIONS(list(node.state))
-        for action in actions:
+        actions = problem.ACTIONS(node.state)
+        for Ci, Cj in actions:
             child = AStarNode(action, 1 + node.cost, 1 + node.cost + heuristic(action))
             in_frontier = bisect.bisect_left(frontier, child)
             if in_frontier < len(frontier) and child.state == frontier[in_frontier].state:
@@ -61,3 +64,7 @@ def AStar(problem:Problem):
             elif child not in explored:
                 heapq.heappush(frontier, child)
     return None
+
+# p = Problem([])
+# actions = p.ACTIONS([[11,12], [13], [14]])
+# print(actions)
