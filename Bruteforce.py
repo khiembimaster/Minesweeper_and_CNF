@@ -1,7 +1,6 @@
 from itertools import combinations
 
 def resolve(Ci:list,Cj:list):
-
     count = 0
     resolvents = None
     for i in range(len(Ci)):
@@ -24,13 +23,13 @@ def resolution(clauses:list):
     while(True):
         new = set()
         for Ci, Cj in combinations(clauses,2):
-            resolvents = resolve(list(Ci),list(Cj))
-            if resolvents is not None:
-                if resolvents == ():
+            resolvent = resolve(list(Ci),list(Cj))
+            if resolvent is not None:
+                if resolvent == ():
                     return True
-                new.add(resolvents)
+                new.add(resolvent)
         if new < clauses:
             return False
         clauses.update(new)
 
-# print(resolution([[-21,11],[-11,12,21],[-12,11],[-11],[12]]))
+print(resolution([[-21,11],[-11,12,21],[-12,11],[-11],[12]]))

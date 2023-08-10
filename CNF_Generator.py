@@ -3,6 +3,8 @@ from itertools import combinations
 from pysat.formula import CNF
 from pysat.solvers import Solver
 import Bruteforce
+import Astar
+
 assigned = {}
 unassigned = set()
 clauses = []
@@ -47,25 +49,30 @@ print(assigned)
 print(unassigned)
 print(clauses)
 for a in unassigned:
-    clauses.append([-int(a)])
     satisfy = True
-    ## PYSAT
-    # cnf = CNF(from_clauses=clauses)
-    # with Solver(bootstrap_with=cnf) as solver:
-    #     satisfy = solver.solve()
     ### A*
+    clauses.append([int(a)])
+    problem = Astar.Problem(clauses)
+    satisfy = not Astar.AStar(problem)
 
     ### BACK-TRACK
 
     ### BRUTE-FORCE
-    satisfy = not (Bruteforce.resolution(clauses))
-
+    # satisfy = not (Bruteforce.resolution(clauses))
+    ## PYSAT
+    # clauses.append([-int(a)])
+    # cnf = CNF(from_clauses=clauses)
+    # with Solver(bootstrap_with=cnf) as solver:
+    #     satisfy = solver.solve()
+    #     print(solver.get_model())
+    
     clauses.pop(-1)
+
     if not satisfy:
         print(a)
         board[int(a[0])-1][int(a[1])-1] = 'X'
-
         clauses.append([int(a)])
+
 np.savetxt('output.csv', board, delimiter=',',fmt='%s')
 
 # nC1 -> A|B|C|D|E
