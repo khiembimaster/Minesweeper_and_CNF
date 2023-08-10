@@ -15,10 +15,17 @@ class Problem():
     def __init__(self, KB):
         self.KB = KB[:-1]
         self.a = [KB[-1]]
-        self.symbols = set()
+        self.symbols = {}
+        self.frequency = {}
         for clause in KB:
-            self.symbols.update([symbol for symbol in clause])
-        self.symbols = {str(abs(symbol)):0 for symbol in self.symbols}
+            for symbol in clause:
+                c_symbol = str(symbol) 
+                if c_symbol not in self.frequency:
+                    self.frequency[c_symbol] = 1
+                else:
+                    self.frequency[c_symbol] += 1
+                self.symbols[str(abs(symbol))]=0
+
     def PL_TRUE(self, model:dict, clauses = None):
         if clauses == None:
             clauses = self.KB
@@ -34,11 +41,10 @@ class Problem():
 
     def PL_TRUE_heuristic(self, model:dict):
         h = 0
-        for clause in self.KB:
-            for symbol in clause:
-                if (symbol > 0) == model[str(abs(symbol))]:
-                    h+=1
-                    break
+        for key, value in model.items():
+            k = key if value == 1 else f'-{key}'
+            if k in self.frequency:
+                h += self.frequency[k]
         return h
 
     def ACTIONS(self, model:dict):
@@ -63,7 +69,8 @@ def AStar(problem:Problem):
         explored.add(node)
         actions = problem.ACTIONS(node.model)
         for action in actions:
-            child = AStarNode(action,frozenset(action.items()), 1 + node.cost,1 + node.cost+ problem.PL_TRUE_heuristic(action))
+            # + problem.PL_TRUE_heuristic(action)
+            child = AStarNode(action,frozenset(action.items()), -1 - node.cost, -1 -node.cost - problem.PL_TRUE_heuristic(action))
             in_frontier = bisect.bisect_left(frontier, child)
             if in_frontier < len(frontier) and child.model == frontier[in_frontier].model:
                 if child < frontier[in_frontier]:
