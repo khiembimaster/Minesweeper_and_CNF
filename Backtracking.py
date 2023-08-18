@@ -37,14 +37,15 @@ def solve_cnf(clauses, assigned, n, m):
     def find_end(i):
         if (i//n +1<=n):
             if(i%m +1<=m):
-                end=(i//n +1)*n+(i%m+1)
+                end=(i//n +1)*m+(i%m+1)
             else:
-                end=(i//n +1)*n+(i%m)
+                end=(i//n +1)*m+(i%m)
         else:
             if(i%10 +1<=m):
-                end=(i//10)*n+(i%10+1)
+                end=(i//10)*m+(i%10+1)
             else:
-                end=(i//10)*n+(i%10)
+                end=(i//10)*m+(i%10)
+        return end
 
 
     def check(assignment,assigned):
@@ -53,24 +54,34 @@ def solve_cnf(clauses, assigned, n, m):
             sum=0   
             i=int(i)
 
-            start=find_start(i)
+            start=i-1
+            if(i%m==1):
+                start=i
 
             end=find_end(i)
-            for j in range(start,end+1,1):
+            if ((start-1)>0):
+                for j in range(start-1,start-4,-1):
+                    if (j==0):
+                        break
+                    if f"{j}"not in assigned.keys():
+                        temp=assignment[j]
+                        if (temp):
+                            sum+=1
+            for j in range(start,start+3,1):
+                if (j//m>i//m or j==i+2):
+                    break
                 if f"{j}"not in assigned.keys():
                     temp=assignment[j]
                     if (temp):
                         sum+=1
-                if (j==i-(m-1)):
-                    if i-1==0:
-                        j=i
-                    else:
-                        j=i-1
-                elif (j==i+1):
-                    if (i+m-1>n*m):
+            if((start+4)//n<=n):
+                for j in range(start+4,start+7,1):
+                    if (j>m*n):
                         break
-                    else:
-                        j=i+(m-1)
+                    if f"{j}"not in assigned.keys():
+                        temp=assignment[j]
+                        if (temp):
+                            sum+=1
             if sum!=temp0:
                 return False
         return True
