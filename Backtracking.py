@@ -22,19 +22,31 @@ def solve_cnf(clauses, assigned, n, m):
         return False
 
     def find_start(i):
-        if (i//10 -1>0):
-            if(i%10 -1>0):
-                start=(i//10 -1)*10+(i%10-1)
+        if (i//n -1>=0):
+            if((i%m) -1>=0):
+                start=(i//n -1)*n+(i%m-1)
             else:
-                start=(i//10 -1)*10+(i%10)
+                start=(i//n -1)*n+(i%m)
         else:
-            if(i%10 -1>0):
-                start=(i//10)*10+(i%10-1)
+            if(i%m -1>0):
+                start=(i//n)*n+(i%m-1)
             else:
-                start=(i//10)*10+(i%10)
+                start=(i//n)*n+(i%m)
         return start
     
-    
+    def find_end(i):
+        if (i//n +1<=n):
+            if(i%m +1<=m):
+                end=(i//n +1)*n+(i%m+1)
+            else:
+                end=(i//n +1)*n+(i%m)
+        else:
+            if(i%10 +1<=m):
+                end=(i//10)*n+(i%10+1)
+            else:
+                end=(i//10)*n+(i%10)
+
+
     def check(assignment,assigned):
         for i in assigned:
             temp0=assigned[i] 
@@ -43,24 +55,22 @@ def solve_cnf(clauses, assigned, n, m):
 
             start=find_start(i)
 
-            if (i//10 +1<=n):
-                if(i%10 +1<=m):
-                    end=(i//10 +1)*10+(i%10+1)
-                else:
-                    end=(i//10 +1)*10+(i%10)
-            else:
-                if(i%10 +1<=m):
-                    end=(i//10)*10+(i%10+1)
-                else:
-                    end=(i//10)*10+(i%10)
-
-            for j in range(start//10,end//10+1,1):
-                for z in range(start%10,(end+1)%10,1):
-                    x=j*10+z
-                    if f"{x}"not in assigned.keys():
-                        temp=assignment[x]
-                        if (temp):
-                            sum+=1
+            end=find_end(i)
+            for j in range(start,end+1,1):
+                if f"{j}"not in assigned.keys():
+                    temp=assignment[j]
+                    if (temp):
+                        sum+=1
+                if (j==i-(m-1)):
+                    if i-1==0:
+                        j=i
+                    else:
+                        j=i-1
+                elif (j==i+1):
+                    if (i+m-1>n*m):
+                        break
+                    else:
+                        j=i+(m-1)
             if sum!=temp0:
                 return False
         return True
