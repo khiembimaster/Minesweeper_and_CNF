@@ -15,14 +15,15 @@ m = len(board[0])
 for i in range(n):
     for j in range(m):
         if int(board[i][j]) > 0:
-            assigned[f'{i+1}{j+1}'] = int(board[i][j])
+            assigned[f'{i*m + j + 1}'] = int(board[i][j])
         else:
-            unassigned.add(f'{i+1}{j+1}')
+            unassigned.add(f'{i*m + j + 1}')
 
 def unassign_neighbors(x, unassigned, n, m):
     s = []
-    i = int(x[0])-1
-    j = int(x[1])-1
+    int_x = int(x) - 1
+    i = int(int_x/m)
+    j = int(int_x%m)
     for k in range(i-1,i+2):
         if k < 0 or k >= n:
             continue
@@ -31,8 +32,8 @@ def unassign_neighbors(x, unassigned, n, m):
                 continue
             if k==i and l==j:
                 continue
-            if f'{k+1}{l+1}' in unassigned:
-                s.append(f'{k+1}{l+1}')
+            if f'{k*m + l + 1}' in unassigned:
+                s.append(f'{k*m + l + 1}')
     return s
 
 for a,i in assigned.items():
@@ -51,26 +52,26 @@ print(clauses)
 for a in unassigned:
     satisfy = True
     ### A*
-    clauses.append([int(a)])
-    problem = Astar.Problem(clauses)
-    satisfy = not Astar.AStar(problem)
+    # clauses.append([int(a)])
+    # problem = Astar.Problem(clauses)
+    # satisfy = not Astar.AStar(problem)
 
     ### BACK-TRACK
 
     ### BRUTE-FORCE
     # satisfy = not (Bruteforce.resolution(clauses))
+    
     ## PYSAT
-    # clauses.append([-int(a)])
-    # cnf = CNF(from_clauses=clauses)
-    # with Solver(bootstrap_with=cnf) as solver:
-    #     satisfy = solver.solve()
-    #     print(solver.get_model())
+    clauses.append([-int(a)])
+    cnf = CNF(from_clauses=clauses)
+    with Solver(bootstrap_with=cnf) as solver:
+        satisfy = solver.solve()
     
     clauses.pop(-1)
 
     if not satisfy:
         print(a)
-        board[int(a[0])-1][int(a[1])-1] = 'X'
+        board[int((int(a)-1)/m)][int((int(a)-1)%m)] = 'X'
         clauses.append([int(a)])
 
 np.savetxt('output.csv', board, delimiter=',',fmt='%s')
@@ -91,3 +92,4 @@ np.savetxt('output.csv', board, delimiter=',',fmt='%s')
 
 # Prenex conjunctive normal form:
 # (A ∨ B ∨ C ∨ D ∨ E) ∧ (¬B ∨ ¬A) ∧ (¬C ∨ ¬A) ∧ (¬C ∨ ¬B) ∧ (¬D ∨ ¬A) ∧ (¬D ∨ ¬B) ∧ (¬D ∨ ¬C) ∧ (¬E ∨ ¬A) ∧ (¬E ∨ ¬B) ∧ (¬E ∨ ¬C) ∧ (¬E ∨ ¬D)
+
