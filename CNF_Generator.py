@@ -3,6 +3,7 @@ from itertools import combinations
 from pysat.formula import CNF
 from pysat.solvers import Solver
 import Bruteforce
+import Backtracking
 import Astar
 
 assigned = {}
@@ -49,6 +50,8 @@ for a,i in assigned.items():
 print(assigned)
 print(unassigned)
 print(clauses)
+sol=Backtracking.solve_cnf(clauses, assigned, n, m)
+Backtracking.finish(sol)
 for a in unassigned:
     satisfy = True
     ### A*
