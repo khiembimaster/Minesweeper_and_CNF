@@ -2,6 +2,8 @@ import numpy as np
 from itertools import combinations
 from pysat.formula import CNF
 from pysat.solvers import Solver
+from time import perf_counter
+
 import Bruteforce
 import Backtracking
 import Astar
@@ -47,36 +49,51 @@ for a,i in assigned.items():
         clauses.append([-int(liter) for liter in clause])
 
 
-print(assigned)
-print(unassigned)
-print(clauses)
-sol=Backtracking.solve_cnf(clauses, assigned, n, m)
-Backtracking.finish(sol)
+# print(assigned)
+# print(unassigned)
+# print(clauses)
+
+print("1. Pysat")
+print("2. A*")
+print("3. Backtrack")
+print("4. Brute-force")
+choice = int(input("Enter algorithm="))
+
+start = perf_counter()
 for a in unassigned:
     satisfy = True
-    ### A*
-    # clauses.append([int(a)])
-    # problem = Astar.Problem(clauses)
-    # satisfy = not Astar.AStar(problem)
-
-    ### BACK-TRACK
-
-    ### BRUTE-FORCE
-    # satisfy = not (Bruteforce.resolution(clauses))
     
     ## PYSAT
-    clauses.append([-int(a)])
-    cnf = CNF(from_clauses=clauses)
-    with Solver(bootstrap_with=cnf) as solver:
-        satisfy = solver.solve()
-    
-    clauses.pop(-1)
+    if(choice == 1):
+        clauses.append([-int(a)])
+        cnf = CNF(from_clauses=clauses)
+        with Solver(bootstrap_with=cnf) as solver:
+            satisfy = solver.solve()
 
+    ### A*
+    if(choice ==2):
+        clauses.append([int(a)])
+        problem = Astar.Problem(clauses)
+        satisfy = not Astar.AStar(problem)
+
+    ### BACK-TRACK
+    if(choice == 3):
+        satisfy = Backtracking.solve_cnf(clauses, assigned, n, m)
+        Backtracking.finish(satisfy)    
+
+    ### BRUTE-FORCE
+    if(choice == 4):
+        satisfy = not (Bruteforce.resolution(clauses))
+    
+    ## Marking
+    clauses.pop(-1)
     if not satisfy:
         print(a)
         board[int((int(a)-1)/m)][int((int(a)-1)%m)] = 'X'
         clauses.append([int(a)])
-
+end = perf_counter()
+execution_time = (end - start)*1000
+print(f'Time: {execution_time}ms')
 np.savetxt('output.csv', board, delimiter=',',fmt='%s')
 
 # nC1 -> A|B|C|D|E
